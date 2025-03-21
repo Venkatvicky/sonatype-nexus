@@ -14,7 +14,7 @@ spec:
         app: nexus
     spec:
       securityContext:
-        fsGroup: 200
+        fsGroup: 200  # Ensures correct volume permissions
       initContainers:
         - name: fix-permissions
           image: busybox
@@ -28,16 +28,17 @@ spec:
           ports:
             - containerPort: 8081
           env:
-            - name: NEXUS_DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: nexus-db-secret
-                  key: NEXUS_DB_PASS
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "-Dnexus.datastore.enabled=true -Dnexus.datastore.type=jdbc -Dnexus.datastore.jdbc.driver=org.postgresql.Driver -Dnexus.datastore.jdbc.url=jdbc:postgresql://postgresql:5432/nexusdb -Dnexus.datastore.jdbc.username=nexus -Dnexus.datastore.jdbc.password=nexus123"
+          envFrom:
+            - configMapRef:
+                name: nexus-config
           volumeMounts:
             - name: nexus-storage
               mountPath: /nexus-data
             - name: nexus-config-volume
-              mountPath: /nexus-data/etc/  # ✅ Corrected: Mount entire directory
+              mountPath: /nexus-data/etc/nexus.properties
+              subPath: nexus.properties
       volumes:
         - name: nexus-storage
           persistentVolumeClaim:
@@ -45,6 +46,3 @@ spec:
         - name: nexus-config-volume
           configMap:
             name: nexus-config
-            items:
-              - key: nexus.properties
-                path: nexus.properties  # ✅ Ensures file is placed inside /nexus-data/etc/
