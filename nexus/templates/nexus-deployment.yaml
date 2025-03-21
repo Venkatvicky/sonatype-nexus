@@ -22,6 +22,29 @@ spec:
           volumeMounts:
             - name: nexus-storage
               mountPath: /nexus-data
+        - name: generate-nexus-config
+          image: busybox
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "nexus.datastore.enabled=true" > /nexus-config/nexus.properties
+              echo "nexus.datastore.type=jdbc" >> /nexus-config/nexus.properties
+              echo "nexus.datastore.jdbc.driver=org.postgresql.Driver" >> /nexus-config/nexus.properties
+              echo "nexus.datastore.jdbc.url=jdbc:postgresql://$NEXUS_DB_HOST:$NEXUS_DB_PORT/$NEXUS_DB_NAME" >> /nexus-config/nexus.properties
+              echo "nexus.datastore.jdbc.username=$NEXUS_DB_USER" >> /nexus-config/nexus.properties
+              echo "nexus.datastore.jdbc.password=$NEXUS_DB_PASS" >> /nexus-config/nexus.properties
+          envFrom:
+            - configMapRef:
+                name: nexus-config
+          env:
+            - name: NEXUS_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: nexus-db-secret
+                  key: NEXUS_DB_PASS
+          volumeMounts:
+            - name: nexus-config-volume
+              mountPath: /nexus-config
       containers:
         - name: nexus
           image: sonatype/nexus3:latest
@@ -40,12 +63,11 @@ spec:
             - name: nexus-storage
               mountPath: /nexus-data
             - name: nexus-config-volume
-              mountPath: /nexus-data/etc/nexus.properties
+              mountPath: /etc/nexus/nexus.properties
               subPath: nexus.properties
       volumes:
         - name: nexus-storage
           persistentVolumeClaim:
             claimName: nexus-pvc
         - name: nexus-config-volume
-          configMap:
-            name: nexus-config
+          emptyDir: {}
