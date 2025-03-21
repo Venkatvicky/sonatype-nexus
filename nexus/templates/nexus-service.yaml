@@ -6,8 +6,29 @@ metadata:
 spec:
   selector:
     app: nexus
+  type: LoadBalancer  # Change to NodePort if needed
   ports:
-    - protocol: TCP
-      port: 8081
+    - name: nexus-ui
+      protocol: TCP
+      port: 8081  # Nexus UI
       targetPort: 8081
-  type: LoadBalancer
+    - name: docker
+      protocol: TCP
+      port: 5000  # Docker Registry (Hosted)
+      targetPort: 5000
+    - name: helm
+      protocol: TCP
+      port: 8082  # Helm Repository
+      targetPort: 8082
+    - name: npm
+      protocol: TCP
+      port: 8083  # NPM Repository
+      targetPort: 8083
+    - name: pypi
+      protocol: TCP
+      port: 8084  # PyPI Repository
+      targetPort: 8084
+    - name: raw
+      protocol: TCP
+      port: 8085  # Raw Repository (ZIP, TAR, etc.)
+      targetPort: 8085
