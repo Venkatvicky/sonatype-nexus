@@ -15,4 +15,4 @@ data:
     nexus.datastore.jdbc.driver=org.postgresql.Driver
     nexus.datastore.jdbc.url=jdbc:postgresql://postgresql:5432/nexusdb
     nexus.datastore.jdbc.username=nexus
-    nexus.datastore.jdbc.password=${NEXUS_DB_PASSWORD}
+    nexus.datastore.jdbc.password=nexus123
