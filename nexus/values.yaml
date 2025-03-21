@@ -5,6 +5,15 @@ nexus:
     type: ClusterIP
     port: 8081
 
+  config:
+    nexus.properties: |
+      nexus.datastore.enabled=true
+      nexus.datastore.type=jdbc
+      nexus.datastore.jdbc.driver=org.postgresql.Driver
+      nexus.datastore.jdbc.url=jdbc:postgresql://postgresql.nexus.svc.cluster.local:5432/nexusdb
+      nexus.datastore.jdbc.username=nexus
+      nexus.datastore.jdbc.password=nexus123
+
 postgresql:
   image: postgres
   tag: latest
