@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexus-config
+  namespace: nexus
+data:
+  NEXUS_DB_HOST: "postgresql"
+  NEXUS_DB_PORT: "5432"
+  NEXUS_DB_USER: "nexus"
+  NEXUS_DB_PASS: "nexus123"
+  NEXUS_DB_NAME: "nexusdb"

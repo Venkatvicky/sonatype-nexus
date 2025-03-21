@@ -1,0 +1,21 @@
+nexus:
+  image: sonatype/nexus3
+  tag: latest
+  service:
+    type: ClusterIP
+    port: 8081
+
+postgresql:
+  image: postgres
+  tag: latest
+  service:
+    type: ClusterIP
+    port: 5432
+  username: nexus
+  password: nexus123
+  database: nexusdb
+
+storageClass: gp2
+persistence:
+  enabled: true
+  size: 10Gi
