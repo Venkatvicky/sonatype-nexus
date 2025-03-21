@@ -14,7 +14,7 @@ spec:
         app: nexus
     spec:
       securityContext:
-        fsGroup: 200  # Ensures the volume has the correct group permissions
+        fsGroup: 200
       initContainers:
         - name: fix-permissions
           image: busybox
@@ -22,37 +22,11 @@ spec:
           volumeMounts:
             - name: nexus-storage
               mountPath: /nexus-data
-        - name: generate-nexus-config
-          image: busybox
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              echo "nexus.datastore.enabled=true" > /nexus-config/nexus.properties
-              echo "nexus.datastore.type=jdbc" >> /nexus-config/nexus.properties
-              echo "nexus.datastore.jdbc.driver=org.postgresql.Driver" >> /nexus-config/nexus.properties
-              echo "nexus.datastore.jdbc.url=jdbc:postgresql://$NEXUS_DB_HOST:$NEXUS_DB_PORT/$NEXUS_DB_NAME" >> /nexus-config/nexus.properties
-              echo "nexus.datastore.jdbc.username=$NEXUS_DB_USER" >> /nexus-config/nexus.properties
-              echo "nexus.datastore.jdbc.password=$NEXUS_DB_PASS" >> /nexus-config/nexus.properties
-          envFrom:
-            - configMapRef:
-                name: nexus-config
-          env:
-            - name: NEXUS_DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: nexus-db-secret
-                  key: NEXUS_DB_PASS
-          volumeMounts:
-            - name: nexus-config-volume
-              mountPath: /nexus-config
       containers:
         - name: nexus
           image: sonatype/nexus3:latest
           ports:
             - containerPort: 8081
-          envFrom:
-            - configMapRef:
-                name: nexus-config
           env:
             - name: NEXUS_DB_PASS
               valueFrom:
@@ -63,11 +37,14 @@ spec:
             - name: nexus-storage
               mountPath: /nexus-data
             - name: nexus-config-volume
-              mountPath: /etc/nexus/nexus.properties
-              subPath: nexus.properties
+              mountPath: /nexus-data/etc/  # ✅ Corrected: Mount entire directory
       volumes:
         - name: nexus-storage
           persistentVolumeClaim:
             claimName: nexus-pvc
         - name: nexus-config-volume
-          emptyDir: {}
+          configMap:
+            name: nexus-config
+            items:
+              - key: nexus.properties
+                path: nexus.properties  # ✅ Ensures file is placed inside /nexus-data/etc/
