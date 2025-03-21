@@ -27,10 +27,25 @@ spec:
           image: sonatype/nexus3:latest
           ports:
             - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: nexus-config
+          env:
+            - name: NEXUS_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: nexus-db-secret
+                  key: NEXUS_DB_PASS
           volumeMounts:
             - name: nexus-storage
               mountPath: /nexus-data
+            - name: nexus-config-volume
+              mountPath: /nexus-data/etc/nexus.properties
+              subPath: nexus.properties
       volumes:
         - name: nexus-storage
           persistentVolumeClaim:
             claimName: nexus-pvc
+        - name: nexus-config-volume
+          configMap:
+            name: nexus-config
