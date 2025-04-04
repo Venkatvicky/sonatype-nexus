@@ -2,7 +2,7 @@ nexus:
   image: sonatype/nexus3
   tag: latest
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 8081
 
   config:
